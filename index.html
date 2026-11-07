@@ -199,7 +199,7 @@ footer{padding:30px 0 10px;text-align:center;color:var(--mute);font-style:italic
 {"id":"g2","n":"Pañales talla P","note":"Paquete grande, cualquier marca suave","ic":"diaper","q":3,"by":[]},
 {"id":"g3","n":"Toallitas húmedas","note":"Sin fragancia, piel sensible","ic":"wipes","q":4,"by":[]},
 {"id":"g4","n":"Set de biberones anticólicos","note":"De 150 ml y 260 ml","ic":"bottle","q":1,"by":[]},
-{"id":"g5","n":"Coche de paseo","note":"Regalo grupal: puedes sumarte entre varios","ic":"stroller","q":1,"by":[]},
+{"id":"g5","n":"Coche de paseo","note":"Ya está apartado","ic":"stroller","q":1,"by":["Reservado"]},
 {"id":"g6","n":"Cuna moisés","note":"Con colchón incluido","ic":"crib","q":1,"by":[]},
 {"id":"g7","n":"Bodys y pijamas","note":"De 0 a 3 meses, algodón","ic":"tee","q":4,"by":[]},
 {"id":"g8","n":"Mantas de algodón","note":"Colores neutros o verde salvia","ic":"blanket","q":2,"by":[]},
@@ -361,7 +361,8 @@ function tick(){
 function giftCard(g){
  const left=g.q-g.by.length, full=left<=0;
  const pill=full?'<span class="pill pill-done">Ya elegido</span>':g.by.length?'<span class="pill pill-part">Quedan '+left+' de '+g.q+'</span>':g.q>1?'<span class="pill">Se necesitan '+g.q+'</span>':'<span class="pill">Disponible</span>';
- const names=g.by.length&&!hostMode?'<p class="by">Lo regalan: '+g.by.map(esc).join(', ')+'</p>':'';
+ const named=g.by.filter(n=>n!=='Reservado');
+ const names=hostMode?'':(named.length?'<p class="by">Lo regalan: '+named.map(esc).join(', ')+'</p>':(full?'<p class="by">Ya lo tenemos. ¡Gracias!</p>':''));
  const act=full?'<button class="btn" disabled type="button">Ya está elegido</button>':'<button class="btn" data-pick="'+g.id+'" type="button">Quiero regalarlo</button>';
  let host='';
  if(hostMode){
