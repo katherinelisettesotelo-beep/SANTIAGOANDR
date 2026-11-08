@@ -176,6 +176,13 @@ section{padding:34px 0;scroll-margin-top:72px}
 .people{font-family:var(--font-display);font-size:2.4rem;line-height:1;color:var(--accent-ink);font-variant-numeric:tabular-nums}
 footer{padding:30px 0 10px;text-align:center;color:var(--mute);font-style:italic}
 
+/* música */
+.music{position:fixed;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:26;display:inline-flex;align-items:center;gap:8px;min-height:48px;padding:0 18px 0 14px;border-radius:999px;border:0;background:var(--accent);color:var(--on-accent);font-family:var(--font-ui);font-weight:700;font-size:.95rem;box-shadow:var(--shadow);cursor:pointer}
+.music:hover{filter:brightness(1.07)}
+.music.on{animation:pulse 2.4s ease-in-out infinite}
+body.has-hostbar .music{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+@keyframes pulse{0%,100%{box-shadow:var(--shadow),0 0 0 0 rgba(88,124,73,.45)}50%{box-shadow:var(--shadow),0 0 0 10px rgba(88,124,73,0)}}
+
 /* hoja de diálogo */
 .sheet{position:fixed;inset:0;z-index:40;display:grid;align-items:end;justify-items:center;background:rgba(30,26,20,.5)}
 .panel{width:min(100%,500px);max-height:92%;overflow:auto;background:var(--bg);border-radius:24px 24px 0 0;padding:22px 20px max(22px,env(safe-area-inset-bottom,0px));animation:up .25s ease}
@@ -332,6 +339,7 @@ function shell(){
   </section>
   <footer>Gracias por ser parte de este milagrito.</footer>
  </div>
+ <button class="music" id="music" type="button" aria-pressed="false"><span class="music-ico"></span><span class="music-t">Música</span></button><audio id="bgm" src="musica.mp3" loop preload="none"></audio>
  <div class="hostbar" id="hostbar" hidden></div>
  <div class="sheet" id="sheet" hidden><div class="panel" role="dialog" aria-modal="true" aria-labelledby="sheet-t"><button class="close" data-close type="button" aria-label="Cerrar">×</button><div id="sheet-body"></div></div></div>`;
 }
@@ -455,6 +463,11 @@ function burst(){
  }
 }
 
+const NOTE='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>';
+const PAUSE='<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 5v14M16 5v14"/></svg>';
+function setMusic(on){const b=$('#music');if(!b)return;b.setAttribute('aria-pressed',on);$('.music-ico',b).innerHTML=on?PAUSE:NOTE;$('.music-t',b).textContent=on?'Pausar':'Música';b.classList.toggle('on',on)}
+function toggleMusic(){const a=$('#bgm');if(!a)return;if(a.paused){a.volume=0.6;a.play().then(()=>setMusic(true)).catch(()=>{$('#music').hidden=true})}else{a.pause();setMusic(false)}}
+
 /* ---------- eventos ---------- */
 document.addEventListener('click',e=>{
  const t=e.target.closest('button,a'); if(!t)return;
@@ -471,6 +484,7 @@ document.addEventListener('click',e=>{
  else if(t.dataset.del){draft.gifts=draft.gifts.filter(x=>x.id!==t.dataset.del);mark()}
  else if(t.dataset.q){const p=t.dataset.q.split('|'),g=draft.gifts.find(x=>x.id===p[0]);if(g){g.q=Math.min(20,Math.max(Math.max(1,g.by.length),g.q+Number(p[1])));mark()}}
  else if(t.dataset.rmr){draft.rsvp.splice(Number(t.dataset.rmr),1);mark()}
+ else if(t.id==='music')toggleMusic();
 });
 $('#root').addEventListener('input',e=>{
  if(e.target.id==='wa'){draft.wa=e.target.value.trim();dirty++;updateBar()}
@@ -502,8 +516,9 @@ document.addEventListener('submit',e=>{
  }
 });
 
+
 /* ---------- arranque ---------- */
-shell(); tick(); setInterval(tick,30000); renderGifts(); renderRsvp(); renderHost();
+shell(); setMusic(false); $('#bgm').addEventListener('error',function(){$('#music').hidden=true}); tick(); setInterval(tick,30000); renderGifts(); renderRsvp(); renderHost();
 (async()=>{
  try{
   if(!(window.claude&&claude.use))return;
